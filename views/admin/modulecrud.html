@@ -1,0 +1,91 @@
+{{define "admin/modulecrud"}}
+{{template "header" .}}
+{{template "res" .}}
+
+{{template "crudtip" .}}
+
+<div style="padding: 15px;">
+
+    <form class="layui-form" method="post"
+    {{if .isCreate}}
+          action="/admin/module/add"
+    {{else}}
+    {{if .isEdit}}
+          action= "/admin/module/update"
+    {{end}}
+    {{end}}
+    >
+        <input type="hidden" name="Id" value="{{.data.Id}}">
+        <input type="hidden" name="Pid" value="{{.data.Pid}}">
+        <input type="hidden" name="__token" value="{{.__token}}">
+
+{{if .isCreate}}
+        <div class="layui-form-item">
+            <label class="layui-form-label">父模块名</label>
+            <div class="layui-form-label" style="width: auto;padding-left: 5px">
+            {{if .data.PName}}
+            {{.data.PName}}
+            {{end}}
+            </div>
+        </div>
+{{end}}
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">模块名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="Name" required  lay-verify="required" placeholder="请输入模块名称" autocomplete="off" class="layui-input" value="{{.data.Name}}" {{.inputTag}}>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">访问类型</label>
+            <div class="layui-input-block">
+                <select id="ClientKind" name="ClientKind" required  lay-verify="required"   {{.inputTag}}>
+                    <option value="0" selected>系统后台</option>
+                    <option value="1">用户后台</option>
+                    <option value="2">APP前台</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">模块Url</label>
+            <div class="layui-input-block">
+                <input type="text" name="Url" placeholder="请输入模块url" autocomplete="off" class="layui-input" value="{{.data.Url}}" {{.inputTag}}>
+            </div>
+        </div>
+
+
+    {{if not .inputTag}}
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    {{end}}
+    </form>
+
+</div>
+
+
+
+
+<script>
+
+    layui.use('form', function(){
+        var form = layui.form;
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            //layer.msg(JSON.stringify(data.field));
+            return true;
+        });
+    });
+
+    (function () {
+        $("#ClientKind").val("{{.data.ClientKind}}");
+    })();
+</script>
+
+{{template "footer" .}}
+{{end}}

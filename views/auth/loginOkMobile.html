@@ -1,0 +1,35 @@
+{{define "auth/loginokmobile"}}
+  {{template "header" .}}
+  <script type="text/javascript" src="/static/script/api.js"></script>
+
+  <script>
+      apiready = function() {
+          $api.setStorage('userId',"{{.userId}}");
+          $api.setStorage('secret',"{{.secret}}");
+          $api.setStorage('rongCloudToken',"{{.rongCloudToken}}");
+
+  {{if  .projectId}}
+          $api.setStorage('projectId',"{{.projectId}}");
+          $api.setStorage('projectName',"{{.projectName}}");
+  {{end}}
+
+          try{
+              api.execScript({
+                  name: 'root',
+                  script: 'initJPush()'
+              });
+          }catch(e){}
+
+          try{
+              api.execScript({
+                  name: 'root',
+                  script: 'initRongCloud()'
+              });
+          }catch(e){}
+          api.closeWin();
+      };
+  </script>
+
+
+{{template "footer" .}}
+{{end}}

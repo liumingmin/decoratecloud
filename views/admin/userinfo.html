@@ -1,0 +1,168 @@
+{{define "admin/userinfo"}}
+{{template "header" .}}
+{{template "res" .}}
+
+{{template "crudtip" .}}
+        <style>
+            .layui-form-labelcust{
+                padding-left: 0px;
+                width:60px;
+            }
+        </style>
+
+<form class="layui-form" method="post" action= "/admin/user/selfupdate"  enctype="multipart/form-data">
+    <input type="hidden" name="Id" value="{{.data.Id}}">
+    <input type="hidden" name="__token" value="{{.__token}}">
+    <input type="hidden" id="PictureId" name="PictureId" value="">
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+
+                <div class="layui-card-body" style="padding: 10px 10px;">
+
+                    <div class="layui-form" lay-filter="">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-labelcust">我的角色</label>
+                            <div class="layui-input-inline" style="line-height: 35px;">
+                                {{if .userTags}}
+                                    {{range .userTags}}
+                                <span class="layui-badge layui-bg-green">{{.Tag}}</span>&nbsp;
+                                    {{end}}
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-labelcust">真实姓名</label>
+
+                            <div class="layui-input-inline">
+                                <input type="text" name="RealName" lay-verify="nickname" autocomplete="off" placeholder="请输入真实姓名" class="layui-input" value="{{.data.RealName}}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-labelcust">头像</label>
+
+                            <div class="layui-input-inline">
+                                <img id="ImageShow" style="height:90px;width:90px" src=""/>
+                            </div>
+
+                            <input type="file" id="FileUrl"  name="FileUrl" style="display:none" />
+
+
+                        </div>
+                        <div class="layui-form-item" style="width: auto;">
+                            <label class="layui-form-label layui-form-labelcust">&nbsp;</label>
+                            <div class="layui-input-inline">
+                            <button type="button" class="layui-btn layui-btn-primary" onclick="openSelFile()">
+                                <i class="layui-icon">&#xe67c;</i>上传图片
+                            </button>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-labelcust">手机</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="Phone" lay-verify="phone" autocomplete="off" class="layui-input" value="{{.data.Phone}}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-labelcust">邮箱</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="Email"  lay-verify="email" autocomplete="off" class="layui-input" value="{{.data.Email}}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label layui-form-labelcust">备注</label>
+                            <div class="layui-input-inline" style="width:200px">
+                                <textarea name="remarks" placeholder="请输入内容" class="layui-textarea" >{{.data.Remark}}</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block" style="text-align: center;margin-left: 0;">
+                                <button class="layui-btn" lay-submit lay-filter="formDemo">确认修改</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+
+{{if  .mobile}}
+<script type="text/javascript" src="/static/script/api.js"></script>
+<script type="text/javascript" src="/static/script/imageapi.js"></script>
+{{end}}
+
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+
+        initPage();
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            //layer.msg(JSON.stringify(data.field));
+            return true;
+        });
+
+        $("#FileUrl").on("change",function(e){
+            getImgURL($("#FileUrl")[0],function(url){
+                $("#ImageShow").attr("src",url);
+            });
+        });
+    });
+
+    function openSelFile(){
+    {{if  .mobile}}
+        ImageApi.selectImage({},function(imgUrl){
+            if(imgUrl.length>0){
+                var imageId = GetUuid();
+                ImageApi.UploadImages("{{.serverHost}}","{{.data.Id}}",imageId,imgUrl[0],function(){
+                    var url = "/images/globe/"+"{{.data.Id}}"+"/"+imageId+".jpg";
+                    $("#ImageShow").attr("src",url);
+                    $("#PictureId").val(imageId);
+                });
+            }
+        });
+    {{else}}
+        document.getElementById("FileUrl").click();
+    {{end}}
+    }
+
+    function getImgURL(node,callback) {
+        var imgURL = "";
+        try{
+            var file = null;
+            if(node.files && node.files[0] ){
+                file = node.files[0];
+            }else if(node.files && node.files.item(0)) {
+                file = node.files.item(0);
+            }
+
+            if (node.files && node.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    imgURL = e.target.result;
+                    callback(imgURL);
+                };
+                reader.readAsDataURL(node.files[0]);
+            }
+        }catch(e){
+        }
+    }
+
+    function initPage(){
+        {{if .data.PictureId}}
+        var url = "/images/globe/{{.data.Id}}/{{.data.PictureId}}.jpg";
+        $("#ImageShow").attr("src",url);
+        {{end}}
+    }
+
+</script>
+
+
+
+{{template "footer" .}}
+{{end}}

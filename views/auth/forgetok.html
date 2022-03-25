@@ -1,0 +1,24 @@
+{{define "auth/forgetok"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<link rel="stylesheet" href="/static/style/admin.css" media="all">
+<link rel="stylesheet" href="/static/style/login.css" media="all">
+
+<div class="layui-fluid">
+    <div class="layadmin-tips">
+        <i class="layui-icon" face>&#xe6af;</i>
+
+        <div class="layui-text" style="font-size: 20px;">
+            密码修改成功
+        </div>
+
+    </div>
+
+    <div style="text-align: center"><a href="/login" class="layui-btn layui-btn-normal">转向登入页</a></div>
+</div>
+
+
+
+{{template "footer" .}}
+{{end}}

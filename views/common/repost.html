@@ -1,0 +1,23 @@
+{{define "repost"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<link rel="stylesheet" href="/static/style/admin.css" media="all">
+
+<div class="layui-fluid">
+    <div class="layadmin-tips">
+        <i class="layui-icon" face>&#xe664;</i>
+
+        <div class="layui-text" style="font-size: 20px;">
+            请勿重复提交表单
+        </div>
+
+    </div>
+
+    <div style="text-align: center"><a href="/login" class="layui-btn layui-btn-normal">转向登入页</a></div>
+
+</div>
+
+{{template "footer" .}}
+{{end}}
+

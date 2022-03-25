@@ -1,0 +1,35 @@
+{{define "admin/index"}}
+{{template "header" .}}
+{{template "res" .}}
+<style>
+    .layadmin-iframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+    }
+</style>
+<div class="layui-layout layui-layout-admin">
+
+{{template "admin/header" .}}
+{{template "admin/side" .}}
+
+    <div class="layui-body" style="bottom: 0px">
+        <!-- 内容主体区域 -->
+        <iframe id="mainbody" name="mainbody" src="" frameborder="0" class="layadmin-iframe"></iframe>
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        var url = $("#leftMenu").children().first().find("a").attr("href");
+        $("#mainbody").attr("src",url);
+    })()
+</script>
+
+ {{template "footer" .}}
+{{end}}

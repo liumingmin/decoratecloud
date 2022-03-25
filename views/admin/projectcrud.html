@@ -1,0 +1,70 @@
+{{define "admin/projectcrud"}}
+{{template "header" .}}
+{{template "res" .}}
+
+{{template "crudtip" .}}
+
+<div style="padding: 15px;">
+
+<form class="layui-form" method="post"
+{{if .isCreate}}
+      action="/admin/project/add"
+{{else}}
+    {{if .isEdit}}
+          action= "/admin/project/update"
+    {{end}}
+{{end}}
+>
+    <input type="hidden" name="Id" value="{{.data.Id}}">
+    <input type="hidden" name="__token" value="{{.__token}}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">工程名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="Name" required  lay-verify="required" placeholder="请输入工程名称" autocomplete="off" class="layui-input" value="{{.data.Name}}" {{.inputTag}}>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">负责人</label>
+        <div class="layui-input-block">
+            <input type="text" name="Owner" required  lay-verify="required" placeholder="请输入负责人" autocomplete="off" class="layui-input" value="{{.data.Owner}}" {{.inputTag}}>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">地址</label>
+        <div class="layui-input-block">
+            <input type="text" name="Address" required  lay-verify="required" placeholder="请输入地址" autocomplete="off" class="layui-input" value="{{.data.Address}}" {{.inputTag}}>
+        </div>
+    </div>
+
+    {{if not .inputTag}}
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+    {{end}}
+</form>
+
+</div>
+
+
+
+
+<script>
+
+    layui.use('form', function(){
+        var form = layui.form;
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            //layer.msg(JSON.stringify(data.field));
+            return true;
+        });
+    });
+</script>
+
+{{template "footer" .}}
+{{end}}

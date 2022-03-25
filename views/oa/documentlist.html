@@ -1,0 +1,312 @@
+{{define "oa/documentlist"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<script src="/static/script/md5.min.js"></script>
+
+<div style="padding: 15px;bottom: 0px;">
+
+    <div >
+        <div class="layui-card-body layui-row layui-col-space10">
+            <div class="layui-col-md6">
+                <input type="text" id="query"  placeholder="输入文件名" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md6">
+                <button class="layui-btn" onclick="loadTreeData()">搜索</button>
+            </div>
+
+            <button class="layui-btn" onclick="create()">新增根目录</button>
+            <button class="layui-btn" onclick="uploadZip()">导入文件包</button>
+        </div>
+
+    </div>
+
+    <div id="doctree"></div>
+</div>
+
+<iframe id="fileZipUploadFrame" name="fileZipUploadFrame" height="0px" width="0px" >
+</iframe>
+<form id="fileZipUploaForm" method="post" action="/oa/document/uploadZip" target="fileZipUploadFrame" enctype="multipart/form-data" style="visibility: hidden">
+    <input type="hidden" id="docModule"  name="docModule" value="{{.docModule}}" />
+    <input type="hidden" id="__secret"  name="__secret" value="notoken" />
+    <input type="file" id="FileZipUrl"  name="FileZipUrl" style="display:none" />
+</form>
+
+        <iframe id="fileUploadFrame" name="fileUploadFrame" height="0px" width="0px" >
+        </iframe>
+<form id="fileUploaForm" method="post" action="/oa/document/upload" target="fileUploadFrame" enctype="multipart/form-data" style="visibility: hidden">
+    <input type="hidden" id="FileId"  name="FileId"  />
+    <input type="hidden" id="docModule"  name="docModule" value="{{.docModule}}" />
+    <input type="hidden" id="__secret"  name="__secret" value="notoken" />
+    <input type="file" id="FileUrl"  name="FileUrl" style="display:none" />
+</form>
+
+        <form id="downloadForm" action="" target="_blank"></form>
+
+<script type="text/html" id="crudtool">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    var idHash={};
+    var layout = [
+        { name: '名称', treeNodes: true,headerClass: 'value_col', colClass: 'value_col', style: 'width: 50%' },
+        { name: '大小', treeNodes: false,field: 'Size', headerClass: 'value_col', colClass: 'value_col', style: 'width: 20%' },
+        {
+            name: '操作',
+            headerClass: 'value_col',
+            colClass: 'value_col',
+            style: 'width: 30%',
+            render: function(row) {
+                var hashCode = md5(row.id);
+                idHash[hashCode] =[row.id,row.name];
+
+                if(row.Kind == 1){
+                    var tpl =  '<a class="layui-btn layui-btn-mini" onclick=createChild("{0}")> 新增</a>'
+                            +'<a class="layui-btn  layui-btn-mini" onclick=editNode("{0}")> 编辑</a>'
+                            +'<a class="layui-btn  layui-btn-mini" onclick=upload("{0}")> 上传</a>'
+                            +'<a class="layui-btn layui-btn-danger layui-btn-mini" onclick=deleteNode("{0}",{1})> 删除</a>';
+
+                    return  tpl.format(hashCode,row.isleaf);
+                }else if(row.Kind == 2){
+                    var tpl =  '<a class="layui-btn  layui-btn-mini" onclick=viewNode("{0}")> 查看</a>'
+                    +'<a class="layui-btn layui-btn-danger layui-btn-mini" onclick=deleteNode("{0}",{1})> 删除</a>'; //列渲染
+                    return  tpl.format(hashCode,row.isleaf);
+                }
+            }
+        }
+    ];
+
+    var layer;
+    var tree1;
+    function loadTree() {
+        layer = layui.layer, form = layui.form, $ = layui.jquery;
+
+
+
+        // tree1.on("click",function(e){
+        //     alert(e.target);
+        // });
+        loadTreeData()
+
+        form.render();
+
+        $('#collapse').on('click', function() {
+            layui.collapse(tree1);
+        });
+
+        $('#expand').on('click', function() {
+            layui.expand(tree1);
+        });
+
+        // var arr = layui.getSelected(tree1);
+        // console.log(arr.length)
+    }
+
+    layui.use(['form', 'tree', 'layer'], function() {
+        loadTree();
+
+    });
+
+    function loadTreeData() {
+        $.getJSON("/oa/document/tree?docModule={{.docModule}}&query="+$("#query").val(),function(result){
+            if(!checkErr(result)){
+                return
+            }
+
+            var datalist = [];
+            if(result&& result.length){
+                datalist = result;
+            }
+
+            $("#doctree").children().each(function () {
+                $(this).remove();
+            });
+
+            tree1 = layui.treeGird({
+                elem: '#doctree', //传入元素选择器
+                spreadable: true, //设置是否全展开，默认不展开
+                checkbox : false,
+                nodes: datalist,
+                layout: layout
+            });
+        });
+    }
+
+    function checkErr(ret){
+        if (ret){
+            if (ret.Code ==0){
+                return true;
+            }else if(ret.Code ==-1){
+                layer.alert("请先选择项目");
+                return false;
+            }
+        }
+        return true ;
+    }
+
+    function create() {
+        layer.prompt({
+            formType: 2,
+            value: '',
+            title: '新建文件夹',
+            area: ['200px', '50px'] //自定义文本域宽高
+        }, function(value, index, elem){
+            if(value!="") {
+                var url = "/oa/document/add";
+                $.post(url, {
+                    "Pid":"",
+                    "Name":value,
+                    "__secret":"notoken",
+                    "docModule":"{{.docModule}}"
+                }, function(result){
+                    if(checkErr(result)){
+                        location.replace(location.href);
+                    }
+                });
+            }
+            layer.close(index);
+        });
+    }
+
+
+
+    function uploadZip(){
+        $("#FileZipUrl").click();
+    }
+
+    function createChild(id){
+        var obj = idHash[id];
+        var realId = obj[0];
+        layer.prompt({
+            formType: 2,
+            value: '',
+            title: '新建文件夹',
+            area: ['200px', '50px'] //自定义文本域宽高
+        }, function(value, index, elem){
+            if(value!="") {
+                var url = "/oa/document/add";
+                $.post(url, {
+                    "Pid":realId,
+                    "Name":value,
+                    "__secret":"notoken",
+                    "docModule":"{{.docModule}}"
+                }, function(result){
+                    if(checkErr(result)){
+                        location.replace(location.href);
+                    }
+                });
+            }
+            layer.close(index);
+        });
+    }
+
+    function editNode(id){
+        var obj = idHash[id];
+        var realId = obj[0];
+
+        layer.prompt({
+            formType: 2,
+            value: obj[1],
+            title: '编辑文件夹',
+            area: ['200px', '50px'] //自定义文本域宽高
+        }, function(value, index, elem){
+            if(value!="") {
+                var url = "/oa/document/update";
+                $.post(url, {
+                    "Id":realId,
+                    "Name":value,
+                    "OldName":obj[1],
+                    "__secret":"notoken",
+                    "docModule":"{{.docModule}}"
+                }, function(result){
+                    if(checkErr(result)){
+                        location.replace(location.href);
+                    }else {
+                        alert(result.Code);
+                    }
+                });
+            }
+            layer.close(index);
+        });
+    }
+
+    function upload(id){
+        var obj = idHash[id];
+        var realId = obj[0];
+
+        $("#FileId").val(realId);
+        $("#FileUrl").click();
+    }
+
+    function deleteNode(id,isleaf){
+        var obj = idHash[id];
+        var realId = obj[0];
+
+
+        layer.confirm('真的删除行么', function(index){
+            layer.close(index);
+
+            var url = "/oa/document/delete";
+            $.post(url, {"Id":realId,"docModule":"{{.docModule}}"}, function(result){
+                if(checkErr(result)){
+                    location.replace(location.href);
+                }else{
+                    layer.msg(result.Msg,{
+                        icon: 2,
+                        time: 2000 //2秒关闭（如果不配置，默认是3秒）
+                    })
+                }
+            });
+
+            //向服务端发送删除指令
+        });
+    }
+    
+    function viewNode(id) {
+        var obj = idHash[id];
+        var realId = obj[0];
+
+        $("#downloadForm").attr("action","/docs/{{.SelectedProjectId}}/{{.docModule}}"+realId);
+        $("#downloadForm").submit();
+    }
+
+    var isUploading = false;
+    var uploadLayIdx;
+    (function(){
+        $("#FileUrl").on("change",function(e){
+            if(!isUploading){
+                isUploading=true;
+                uploadLayIdx = layer.load(2, {time: 20*1000});
+                $("#fileUploaForm").submit();
+            }
+        });
+
+        $("#fileUploadFrame").on("load",function(){
+            isUploading=false;
+            layer.close(uploadLayIdx);
+            location.replace(location.href);
+        });
+
+        $("#FileZipUrl").on("change",function(e){
+            if(!isUploading){
+                isUploading=true;
+                uploadLayIdx = layer.load(2, {time: 30*1000});
+                $("#fileZipUploaForm").submit();
+            }
+        });
+
+        $("#fileZipUploadFrame").on("load",function(){
+            isUploading=false;
+            layer.close(uploadLayIdx);
+            location.replace(location.href);
+        });
+    })();
+
+
+</script>
+
+{{template "footer" .}}
+{{end}}

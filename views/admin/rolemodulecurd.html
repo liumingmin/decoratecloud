@@ -1,0 +1,53 @@
+{{define "admin/rolemodulecurd"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<div style="padding: 15px;bottom: 0px;">
+
+    <div class="layui-btn-group">
+        <button class="layui-btn" onclick="create()">save</button>
+    </div>
+
+    <div id="moduletree"></div>
+</div>
+
+<script>
+
+    var treecols=[[
+        {field:'Name', edit:'text',width:300, title: '模块名'}
+        ,{field:'Url', edit:'text',width:300, title: '链接地址'}
+    ]];
+
+    var editObj=null,ptable=null,treeGrid=null,tableId='moduletree',layer=null;
+    layui.extend({
+        treeGrid:'treeGrid'
+    }).use(['jquery','treeGrid','layer'], function(){
+        var $=layui.jquery;
+        treeGrid = layui.treeGrid;//很重要
+        layer=layui.layer;
+        ptable=treeGrid.render({
+            id:tableId
+            ,elem: '#'+tableId
+            ,idField:'id'
+            ,url:'/admin/module/tree'
+            ,cellMinWidth: 100
+            ,treeId:'id'//树形id字段名称
+            ,treeUpId:'pId'//树形父id字段名称
+            ,treeShowName:'name'//以树形式显示的字段
+            ,cols: treecols
+            ,page:false
+        });
+
+        treeGrid.on('tool('+tableId+')',function (obj) {
+            if(obj.event === 'del'){//删除行
+                del(obj);
+            }else if(obj.event==="add"){//添加行
+                add(obj.data);
+            }
+        });
+    });
+
+</script>
+
+{{template "footer" .}}
+{{end}}

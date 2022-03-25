@@ -1,0 +1,157 @@
+{{define "auth/login"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<link rel="stylesheet" href="/static/style/admin.css" media="all">
+<link rel="stylesheet" href="/static/style/login.css" media="all">
+
+<div  style="padding-left: 30px;padding-right: 30px;padding-top: 15px;">
+{{if  .msg}}
+<div class="layui-bg-red" style="padding: 15px;"> {{.msg}}</div>
+{{end}}
+</div>
+
+<div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login" >
+
+    <div class="layadmin-user-login-main">
+        <div class="layadmin-user-login-box layadmin-user-login-header">
+            <h2>ebc</h2>
+            <p>ebc</p>
+        </div>
+
+        <form method="post" action="/login">
+        <input type="hidden" name="__token" value="{{.__token}}">
+        <input type="hidden" id="__captchaId" name="__captchaId" value="{{.__captchaId}}">
+        <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-username" for="LAY-user-login-username"></label>
+                <input type="text" name="UserName" id="LAY-user-login-username" lay-verify="required" placeholder="用户名" class="layui-input">
+            </div>
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+                <input type="password" name="Password" id="LAY-user-login-password" lay-verify="required" placeholder="密码" class="layui-input">
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-row">
+                    <div class="layui-col-xs7">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-vercode" for="LAY-user-login-vercode"></label>
+                        <input type="text" name="__captchaCode" id="LAY-user-login-vercode" lay-verify="required" placeholder="图形验证码" class="layui-input">
+                    </div>
+                    <div class="layui-col-xs5">
+                        <div style="margin-left: 10px;">
+                            <img src="" class="layadmin-user-login-codeimg" id="captchaImg" onclick="reloadcaptcha()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-bottom: 20px;">
+                <input type="checkbox" id="remember" lay-skin="primary" title="记住用户名">
+
+            </div>
+            <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-login-submit">登 入</button>
+            </div>
+            <div class="layui-trans layui-form-item layadmin-user-login-other">
+
+                <a href="/forget" class=" layadmin-link" style="float: left">忘记密码？</a>
+                <a href="/reg" class="layadmin-user-jump-change layadmin-link" >注册帐号</a>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+</div>
+
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+
+        form.render();
+
+        //提交
+        form.on('submit(LAY-user-login-submit)', function(obj){
+            var storage = window.localStorage;
+            if ($("#remember").is(':checked'))
+            {
+                var userName = $("#LAY-user-login-username").val();
+                storage["ebcUserName"] =userName;
+            }else{
+                storage.removeItem("ebcUserName");
+            }
+
+            return true;
+
+
+        });
+
+    });
+
+    function reloadcaptcha()
+    {
+        $.get("/recaptcha", {}, function(result){
+            if(result!= "")
+            {
+                $("#__captchaId").val(result);
+                $("#captchaImg").attr("src","/captcha/"+result);
+            }
+        });
+    }
+
+    (function()
+    {
+        reloadcaptcha();
+
+        var storage = window.localStorage;
+        var userName = storage["ebcUserName"];
+        if(userName)
+        {
+            $("#LAY-user-login-username").val(userName);
+            $("#remember").attr("checked",true);
+        }
+
+    })();
+</script>
+
+{{if  .mobile}}
+<script type="text/javascript" src="/static/script/api.js"></script>
+<script>
+    apiready = function() {
+        RegDoubleBackQuit();
+    }
+    function RegDoubleBackQuit(){
+        api.addEventListener({
+            name: 'keyback'
+        }, function(ret, err){
+            if(api.frameName != "root")
+                api.historyBack();
+
+            api.toast({
+                msg: '再按一次返回键退出'+api.appName,
+                duration:2000,
+                location: 'bottom'
+            });
+
+            api.addEventListener({
+                name: 'keyback'
+            }, function(ret, err){
+                if(api.frameName != "root")
+                    api.historyBack();
+
+                api.closeWidget({
+                    id: 'A6078652148122',     //这里改成自己的应用ID
+                    retData: {name:'closeWidget'},
+                    silent:true
+                });
+            });
+
+            setTimeout(function(){
+                RegDoubleBackQuit();
+            },3000);
+        });
+    }
+</script>
+{{end}}
+
+{{template "footer" .}}
+{{end}}

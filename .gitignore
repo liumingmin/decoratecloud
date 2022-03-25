@@ -1,0 +1,16 @@
+bin/
+target/
+.idea
+*.log
+.idea/
+*.iml
+*.class
+*.exe
+*/**/.*
+*/**/.*/
+*/**/*.iml
+*/**/*.class
+main
+go.sum
+server.sock
+!.gitignore

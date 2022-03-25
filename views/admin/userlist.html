@@ -1,0 +1,105 @@
+{{define "admin/userlist"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<div style="padding: 15px;bottom: 0px;"  >
+
+    <div class="layui-btn-group">
+        <button class="layui-btn" onclick="create()">新增</button>
+    </div>
+
+    <table id="userlist" lay-filter="user"></table>
+</div>
+
+
+<script type="text/html" id="crudtool">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    var layer;
+    var table;
+    layui.use(['table','layer','element'], function(){
+        layer = layui.layer;
+        table = layui.table;
+
+        //第一个实例
+        table.render({
+            elem: '#userlist'
+            ,id:'userlist'
+            ,height: 'full-100'
+            ,url: '/queryapi/queryLayuiByCond' //数据接口
+            ,where:{"queryId":"{{.queryId}}"}
+            ,page: true //开启分页
+            ,limit:20
+            ,cols: [[ //表头
+                {field: 'UserName', title: '账户名', width:120,fixed: 'left'}
+                ,{field: 'RealName', title: '姓名', width:100}
+                ,{field: 'Email', title: '邮箱', width:200}
+                ,{field: 'Phone', title: '电话', width:200}
+                ,{field: 'RoleName', title: '角色', width:300}
+                ,{field: 'OrgName', title: '所属机构', width:100}
+                ,{field: 'LastLoginIp', title: '最后登录', width:120}
+                ,{field: 'IsEnable', title: '状态', width:100,templet: function(d){
+                       if(d.IsEnable==1) return "启用"; else return "禁用";
+                    }}
+                ,{fixed: 'right', width:150, align:'center', toolbar: '#crudtool'}
+            ]]
+        });
+
+        table.on('tool(user)', function(obj){
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event;
+
+            if(layEvent === 'detail'){ //查看
+                layer.open({
+                    type: 2,
+                    area: ['800px', '600px'],
+                    title:"编辑",
+                    content: '/admin/user/view?Id='+data.Id
+                })
+            } else if(layEvent === 'del'){ //删除
+                layer.confirm('真的删除行么', function(index){
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                    layer.close(index);
+
+                    var url = "/admin/user/delete?Id="+data.Id;
+                    $.post(url, {}, function(result){if(result.Code!=0){alert(result.Msg)}});
+
+                    //向服务端发送删除指令
+                });
+            } else if(layEvent === 'edit'){ //编辑
+                layer.open({
+                    type: 2,
+                    area: ['800px', '600px'],
+                    title:"编辑",
+                    content: '/admin/user/edit?Id='+data.Id,
+                    cancel: function(){
+                        table.reload('user')
+                    }
+                });
+                //table.reload('project')
+                //同步更新缓存对应的值
+                // obj.update({
+                //     username: '123'
+                //     ,title: 'xxx'
+                // });
+            }
+        });
+    });
+
+    function create() {
+        layer.open({
+            type: 2,
+            area: ['800px', '600px'],
+            title:"创建",
+            content: '/admin/user/create'
+        })
+    }
+
+</script>
+
+{{template "footer" .}}
+{{end}}

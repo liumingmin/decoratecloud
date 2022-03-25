@@ -1,0 +1,141 @@
+{{define "auth/forget"}}
+{{template "header" .}}
+{{template "res" .}}
+
+<link rel="stylesheet" href="/static/style/admin.css" media="all">
+<link rel="stylesheet" href="/static/style/login.css" media="all">
+
+<div  style="padding-left: 30px;padding-right: 30px;padding-top: 15px;">
+{{if  .msg}}
+    <div class="layui-bg-red" style="padding: 15px;"> {{.msg}}</div>
+{{end}}
+</div>
+
+<div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login" style="display: none;">
+<div class="layadmin-user-login-main">
+    <div class="layadmin-user-login-box layadmin-user-login-header">
+        <h2>ebc</h2>
+        <p>ebc</p>
+    </div>
+<div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+
+{{if .resetpass }}
+
+<form method="post" action="/forgetRepass">
+    <input type="hidden" name="__token" value="{{.__token}}">
+    <input type="hidden" name="UserName" value="{{.UserName}}">
+<div class="layui-form-item">
+    <label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+    <input type="password" name="Password" id="LAY-user-login-password" lay-verify="pass" placeholder="新密码" class="layui-input">
+</div>
+<div class="layui-form-item">
+    <label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-repass"></label>
+    <input type="password" name="Repass" id="LAY-user-login-repass" lay-verify="required" placeholder="确认密码" class="layui-input">
+</div>
+<div class="layui-form-item">
+    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-forget-resetpass">重置新密码</button>
+</div>
+</form>
+
+    <script>
+
+        layui.use(['form'], function(){
+            var form = layui.form;
+
+            form.render();
+
+            //提交
+            form.on('submit(LAY-user-forget-resetpass)', function(obj){
+                return true;
+
+            });
+
+        });
+    </script>
+
+{{else }}
+
+<form method="post" action="/forget">
+    <input type="hidden" name="__token" value="{{.__token}}">
+    <input type="hidden" id="__captchaId" name="__captchaId" value="{{.__captchaId}}">
+
+    <div class="layui-form-item">
+    <label class="layadmin-user-login-icon layui-icon layui-icon-cellphone" for="LAY-user-login-cellphone"></label>
+    <input type="text" name="phone" id="LAY-user-login-cellphone" lay-verify="phone" placeholder="请输入注册时的手机号" class="layui-input">
+</div>
+<div class="layui-form-item">
+    <div class="layui-row">
+        <div class="layui-col-xs7">
+            <label class="layadmin-user-login-icon layui-icon layui-icon-vercode" for="LAY-user-login-vercode"></label>
+            <input type="text" name="__captchaCode" id="LAY-user-login-vercode" lay-verify="required" placeholder="图形验证码" class="layui-input">
+        </div>
+        <div class="layui-col-xs5">
+            <div style="margin-left: 10px;">
+                <img src="" class="layadmin-user-login-codeimg" id="captchaImg" onclick="reloadcaptcha()">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-form-item">
+    <div class="layui-row">
+        <div class="layui-col-xs7">
+            <label class="layadmin-user-login-icon layui-icon layui-icon-vercode" for="LAY-user-login-smscode"></label>
+            <input type="text" name="vercode" id="LAY-user-login-smscode" lay-verify="required" placeholder="短信验证码" class="layui-input">
+        </div>
+        <div class="layui-col-xs5">
+            <div style="margin-left: 10px;">
+                <button type="button" class="layui-btn layui-btn-primary layui-btn-fluid" id="LAY-user-getsmscode">获取验证码</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-form-item">
+    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-forget-submit">找回密码</button>
+</div>
+</form>
+
+    <script>
+
+        layui.use(['form'], function(){
+            var form = layui.form;
+
+            form.render();
+
+            //提交
+            form.on('submit(LAY-user-forget-submit)', function(obj){
+                return true;
+
+            });
+
+        });
+
+        function reloadcaptcha()
+        {
+            $.get("/recaptcha", {}, function(result){
+                if(result!= "")
+                {
+                    $("#__captchaId").val(result);
+                    $("#captchaImg").attr("src","/captcha/"+result);
+                }
+            });
+        }
+
+        (function()
+        {
+            reloadcaptcha();
+        })();
+    </script>
+
+{{end}}
+
+
+</div>
+</div>
+
+
+</div>
+
+
+
+{{template "footer" .}}
+{{end}}

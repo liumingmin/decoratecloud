@@ -1,0 +1,15 @@
+{{define "crudtip"}}
+
+<div  style="padding-left: 15px;padding-right: 15px;padding-top: 15px;">
+
+{{if .submited}}
+{{if .isok}}
+    <div class="layui-bg-blue" style="padding: 15px;"> {{.msg}}</div>
+{{else}}
+    <div class="layui-bg-red" style="padding: 15px;"> {{.msg}}</div>
+{{end}}
+{{end}}
+
+</div>
+
+{{end}}

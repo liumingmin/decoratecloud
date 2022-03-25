@@ -1,0 +1,97 @@
+{{define "admin/header"}}
+
+<div class="layui-header">
+
+    <ul class="layui-nav ">
+        <li class="layui-nav-item" style="width: 12em">
+            <a href="javascript:;">
+
+            {{if .SelectedProject}}
+                <img id="projectAvatar" src="/images/globe/{{.SelectedProject.Id}}/{{.SelectedProject.PictureId}}.jpg" class="layui-nav-img">
+                <span id="projectName">{{.SelectedProject.Name}}</span>
+            {{else}}
+
+                <span id="projectName">[选择项目]</span>
+            {{end}}
+
+            </a>
+            <dl class="layui-nav-child">
+                {{range .Projects}}
+                <dd><a href="javascript:selectProject('{{.Id}}')">{{.Name}}</a></dd>
+                {{end}}
+            </dl>
+        </li>
+    </ul>
+
+    <ul class="layui-nav layui-layout-left">
+
+    {{range .L1Module}}
+        <li class="layui-nav-item"><a href="/admin/index?pModuleId={{.Id}}">{{.Name}}</a></li>
+    {{end}}
+
+        <li class="layui-nav-item">
+            <a href="javascript:;">其它系统</a>
+            <dl class="layui-nav-child">
+                <dd><a href="">日志管理</a></dd>
+                <dd><a href="">消息管理</a></dd>
+            </dl>
+        </li>
+    </ul>
+
+    <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item">
+            <a href="javascript:;">
+                <img id="userAvatar" src="" class="layui-nav-img">
+                <span id="userRealName"></span>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="javascript:openUserSelfEdit()">基本资料</a></dd>
+                <dd><a href="javascript:openUserPwdEdit()">修改密码</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item"><a href="/logout">注销</a></li>
+    </ul>
+</div>
+
+<script>
+    var headerlayer;
+    layui.use(['layer','element'], function() {
+        headerlayer = layui.layer;
+        initPageHeader();
+    });
+
+    function openUserSelfEdit(){
+        headerlayer.open({
+            type: 2,
+            area: ['800px', '600px'],
+            title:"基本资料",
+            content: '/admin/user/selfedit'
+        })
+    }
+
+    function openUserPwdEdit(){
+        headerlayer.open({
+            type: 2,
+            area: ['800px', '600px'],
+            title:"修改密码",
+            content: '/admin/user/editpwd'
+        })
+    }
+
+    function initPageHeader(){
+        $.get("/admin/user/simpleinfo", {}, function(result){
+            if(result.Code==0){
+            var user = result.Content;
+            var url = "/images/globe/"+user.Id+"/"+user.PictureId+".jpg";
+            $("#userAvatar").attr("src",url);
+            $("#userRealName").html(user.RealName);
+        }});
+    }
+
+    function selectProject(id){
+        $.post("/admin/selectproject", {"ProjectId":id,"__secret":"notoken"}, function(result){
+            location.reload();
+        });
+    }
+</script>
+{{end}}

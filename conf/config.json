@@ -1,0 +1,67 @@
+{
+  "debug": {
+    "mysql": {
+      "host": "localhost",
+      "port":"3306",
+      "user": "root",
+      "password": "",
+      "dbname":"ebc",
+      "syncDb":true,
+      "poolsize":10
+    },
+    "redis": {
+      "host": "localhost",
+      "port": "6379",
+      "password": "",
+      "poolsize":10
+    },
+    "schedule":{
+      "appNotifyTask":{
+        "enable":false,
+        "cron":"0/10 * * * * ?"
+      }
+    },
+    "filesrv":{
+      "imagesPath":"G:/images",
+      "docsPath":"G:/docs"
+    },
+    "web":{
+      "host":"10.1.31.37",
+      "port":"8000"
+    }
+  },
+  "release": {
+    "mysql": {
+      "host": "localhost",
+      "port":"3306",
+      "user": "root",
+      "password": "",
+      "dbname":"ebc",
+      "syncDb":true,
+      "poolsize":100
+    },
+    "redis": {
+      "host": "localhost",
+      "port": "6379",
+      "password": "",
+      "poolsize":100
+    },
+    "schedule":{
+      "appNotifyTask":{
+        "enable":true,
+        "cron":"0/20 * * * * ?"
+      }
+    },
+    "filesrv":{
+      "imagesPath":"c:/ebc/images",
+      "docsPath":"c:/ebc/docs"
+    },
+    "web":{
+      "host":"47.96.248.36",
+      "port":"80"
+    }
+  },
+  "test": {
+
+  }
+}
