@@ -1,0 +1,20 @@
+允许 root 账号从 10.0.0.2 IP 访问，并设置密码为 123456
+mysql>grant all privileges on *.* to 'root'@'10.0.0.2' identified by '123456' with grant option;   
+mysql>flush privileges;
+
+让 root 账号可以被远程访问，并设置密码 123456
+mysql>grant all privileges on *.* to 'root'@'%' identified by '123456' with grant option;
+mysql>flush privileges;
+
+修改密码方法 1，基本方法
+mysql>set password =password('newpassword');
+mysql>flush privileges;
+
+修改 root 的 localhost 的密码方法, 2，使用 grant 语句 
+mysql>grant all on *.* to 'root'@'localhost' identified by 'newpassword' with grant option;
+mysql>flush privileges;
+
+修改方法3
+mysql>grant all on mysql.* to root@'%' identified by '123456';
+mysql>flush privileges;
+设置 root 密码为 123456;
