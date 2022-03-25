@@ -1,0 +1,2 @@
+# decoratecloud
+decorate project
